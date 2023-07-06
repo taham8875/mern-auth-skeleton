@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "build": "tsc -p .",
-    "dev": "nodemon --exec ts-node --files backend/server.ts"
+    "dev": "nodemon --exec ts-node --files server.ts"
   },
   "keywords": [],
   "author": "",
