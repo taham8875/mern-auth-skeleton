@@ -1,11 +1,12 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import User from "../models/user.model.ts";
 import generateToken from "../utils/generateToken.util.ts";
+import asyncHandler from "express-async-handler";
 
 // @desc    Register a new user
 // @route   POST /api/users
 // @access  Public
-const registerUser = async (req: Request, res: Response) => {
+const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -24,12 +25,12 @@ const registerUser = async (req: Request, res: Response) => {
     res.status(400);
     throw new Error("Invalid user data");
   }
-};
+});
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
 // @access  Public
-const authUser = async (req: Request, res: Response) => {
+const authUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (user && (await user.comparePasswords(password))) {
@@ -43,49 +44,60 @@ const authUser = async (req: Request, res: Response) => {
     res.status(401);
     throw new Error("Invalid email or password"); // No need to help hacker by telling them which one is wrong 🤷🏻‍♂️
   }
-};
+});
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
-const getUserProfile = async (req: Request, res: Response) => {
-  const user = {
-    _id: req.user._id,
-    name: req.user.name,
-    email: req.user.email,
-  };
-  res.status(200).json(user);
-};
+const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
 
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 // @access  Private
-const updateUserProfile = async (req: Request, res: Response) => {
+const updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
   const user = await User.findById(req.user._id);
   if (user) {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     user.password = req.body.password || user.password;
-    const updatedUser = await user.save();
 
-    res.status(200).json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-    });
+    try {
+      const updatedUser = await user.save();
+      res.status(200).json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+      });
+    } catch (error) {
+      res.status(400);
+      throw new Error("Invalid user data");
+    }
   } else {
     res.status(404);
     throw new Error("User not found");
   }
-};
+});
 
 // @desc    Get logout user
 // @route   GET /api/users/logout
 // @access  Public
-const logoutUser = async (req: Request, res: Response) => {
-  res.clearCookie("token");
+const logoutUser = asyncHandler(async (req: Request, res: Response) => {
+  res.clearCookie("jwt");
   res.status(200).json({ message: "Logged out successfully" });
-};
+});
 
 export {
   authUser,
