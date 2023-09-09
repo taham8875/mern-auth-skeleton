@@ -1,0 +1,118 @@
+import { useState } from "react";
+import { Form, Button, Row, Col } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import FormContainer from "../components/FormContainer";
+import { useDispatch, useSelector } from "react-redux";
+import { setCredentials } from "../slices/authSlice";
+import { useRegisterMutation } from "../slices/usersApiSlice";
+import { toast } from "react-toastify";
+
+function RegisterScreen() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [register] = useRegisterMutation();
+
+
+  const submitHandler = async (e: any) => {
+    e.preventDefault();
+    console.log("submit");
+    if (password !== confirmPassword) {
+      toast.error ('Passwords do not match', {
+        position: "bottom-center",
+        autoClose: 2500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    } else {
+      try {
+        const result = await register({ name : username, email, password }).unwrap();
+        console.log(`{ username, email, password }`, { username, email, password });
+        console.log(`result`, result);
+        dispatch(setCredentials(result));
+        navigate("/");
+      } catch (error) {
+        toast.error (error?.data?.message || error?.error, {
+          position: "bottom-center",
+          autoClose: 2500,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="my-5">
+      <FormContainer>
+        <h1>Sign Up</h1>
+        <Form onSubmit={submitHandler}>
+          <Form.Group className="my-2" controlId="username">
+            <Form.Label>Username</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+
+          <Form.Group className="my-2" controlId="email">
+            <Form.Label>Email Address</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+
+          <Form.Group className="my-2" controlId="password">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+
+          <Form.Group className="my-2" controlId="confirm-password">
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            ></Form.Control>
+          </Form.Group>
+
+          <Button type="submit" variant="primary" className="mt-3">
+            Register
+          </Button>
+        </Form>
+
+        <Row className="py-3">
+          <Col>
+            Already have an account? <Link to="/login">Sign In</Link>
+          </Col>
+        </Row>
+      </FormContainer>
+    </div>
+  );
+}
+
+export default RegisterScreen;
