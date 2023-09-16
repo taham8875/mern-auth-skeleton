@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import FormContainer from "../components/FormContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
@@ -16,6 +16,8 @@ function RegisterScreen() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  console.log(`searchParams from login`, searchParams.get("return_to"));
 
   const [register, {isLoading}] = useRegisterMutation();
 
@@ -47,7 +49,13 @@ function RegisterScreen() {
         });
         console.log(`result`, result);
         dispatch(setCredentials(result));
-        navigate("/");
+        const return_to = searchParams.get("return_to");
+        if (return_to) {
+          console.log(`return_to`, return_to);
+          navigate(return_to);
+        } else {
+          navigate("/");
+        }
       } catch (error) {
         toast.error(error?.data?.message || error?.error, {
           position: "bottom-center",
