@@ -11,6 +11,7 @@ import App from "./App.tsx";
 import HomeScreen from "./screens/HomeScreen.tsx";
 import LoginScreen from "./screens/LoginScreen.tsx";
 import RegisterScreen from "./screens/RegisterScreen.tsx";
+import PrivateRoute from "./components/PrivateRoute.tsx";
 
 
 const routes = createBrowserRouter(
@@ -19,6 +20,9 @@ const routes = createBrowserRouter(
       <Route index={true} path="/" element={<HomeScreen />} />
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/register" element={<RegisterScreen />} />
+      <Route path="" element={<PrivateRoute />} >
+        <Route path="/profile" element={<h1>Private</h1>} />
+      </Route>
     </Route>
   )
 );
