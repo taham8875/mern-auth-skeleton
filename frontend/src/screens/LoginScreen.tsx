@@ -7,6 +7,8 @@ import { setCredentials } from "../slices/authSlice";
 import FormContainer from "../components/FormContainer";
 import { toast } from "react-toastify";
 
+import CustomSpinner from "../components/CustomSpinner";
+
 function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,11 +16,11 @@ function LoginScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [login, { isLoading } , result] = useLoginMutation();
+  const [login, { isLoading }, result] = useLoginMutation();
 
   console.log(`result`, result);
 
-  const {userInformation} = useSelector((state: any) => state.auth);
+  const { userInformation } = useSelector((state: any) => state.auth);
 
   console.log(`userInformation`, userInformation);
 
@@ -36,7 +38,7 @@ function LoginScreen() {
       dispatch(setCredentials(result));
       navigate("/");
     } catch (error) {
-      toast.error (error?.data?.message || error?.error, {
+      toast.error(error?.data?.message || error?.error, {
         position: "bottom-center",
         autoClose: 2500,
         hideProgressBar: true,
@@ -73,8 +75,19 @@ function LoginScreen() {
             ></Form.Control>
           </Form.Group>
 
-          <Button type="submit" variant="primary" className="mt-3">
-            Sign In
+          <Button
+            type="submit"
+            variant="primary"
+            className="mt-3"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+            }}
+            disabled={isLoading}
+          >
+            {isLoading && <CustomSpinner />} Sign In
           </Button>
         </Form>
 

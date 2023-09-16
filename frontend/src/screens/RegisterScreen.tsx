@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
 import { useRegisterMutation } from "../slices/usersApiSlice";
 import { toast } from "react-toastify";
+import CustomSpinner from "../components/CustomSpinner";
 
 function RegisterScreen() {
   const [username, setUsername] = useState("");
@@ -16,14 +17,13 @@ function RegisterScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [register] = useRegisterMutation();
-
+  const [register, {isLoading}] = useRegisterMutation();
 
   const submitHandler = async (e: any) => {
     e.preventDefault();
     console.log("submit");
     if (password !== confirmPassword) {
-      toast.error ('Passwords do not match', {
+      toast.error("Passwords do not match", {
         position: "bottom-center",
         autoClose: 2500,
         hideProgressBar: true,
@@ -35,13 +35,21 @@ function RegisterScreen() {
       });
     } else {
       try {
-        const result = await register({ name : username, email, password }).unwrap();
-        console.log(`{ username, email, password }`, { username, email, password });
+        const result = await register({
+          name: username,
+          email,
+          password,
+        }).unwrap();
+        console.log(`{ username, email, password }`, {
+          username,
+          email,
+          password,
+        });
         console.log(`result`, result);
         dispatch(setCredentials(result));
         navigate("/");
       } catch (error) {
-        toast.error (error?.data?.message || error?.error, {
+        toast.error(error?.data?.message || error?.error, {
           position: "bottom-center",
           autoClose: 2500,
           hideProgressBar: true,
@@ -100,8 +108,19 @@ function RegisterScreen() {
             ></Form.Control>
           </Form.Group>
 
-          <Button type="submit" variant="primary" className="mt-3">
-            Register
+          <Button
+            type="submit"
+            variant="primary"
+            className="mt-3"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+            }}
+            disabled={isLoading}
+          >
+            {isLoading && <CustomSpinner />} Register
           </Button>
         </Form>
 
